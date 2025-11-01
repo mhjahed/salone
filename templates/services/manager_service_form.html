@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - Salone{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>{{ title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label>Title</label>
+                        {{ form.title }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Summary</label>
+                        {{ form.summary }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Description</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Price ($)</label>
+                        {{ form.price }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Duration (minutes)</label>
+                        {{ form.duration }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Image</label>
+                        {{ form.image }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label">Active</label>
+                    </div>
+                    
+                    <h4>Addons</h4>
+                    {{ formset.management_form }}
+                    <div id="addon-forms">
+                        {% for addon_form in formset %}
+                            <div class="addon-form mb-3 p-3 border rounded">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        {{ addon_form.name.label_tag }}
+                                        {{ addon_form.name }}
+                                    </div>
+                                    <div class="col-md-5">
+                                        {{ addon_form.price.label_tag }}
+                                        {{ addon_form.price }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        {% if addon_form.DELETE %}
+                                            {{ addon_form.DELETE }} Delete
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if addon_form.non_field_errors %}
+                                    <div class="text-danger">{{ addon_form.non_field_errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">Save Service</button>
+                    <a href="{% url 'services:service_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

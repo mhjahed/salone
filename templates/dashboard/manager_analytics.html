@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+{% block title %}Analytics Dashboard - Salone{% endblock %}
+{% block extra_css %}
+<style>
+.chart-container { height: 300px; position: relative; margin-bottom: 2rem; }
+</style>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Appointments Chart
+    const apptCtx = document.getElementById('appointmentsChart').getContext('2d');
+    new Chart(apptCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ daily_appointments_labels|safe }},
+            datasets: [{
+                label: 'Appointments per Day',
+                data: {{ daily_appointments_data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                }
+            }
+        }
+    });
+
+    // Revenue Chart
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ daily_revenue_labels|safe }},
+            datasets: [{
+                label: 'Revenue per Day ($)',
+                data: {{ daily_revenue_data|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                }
+            }
+        }
+    });
+
+    // Customer Growth Chart
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: {{ customer_growth_labels|safe }},
+            datasets: [{
+                label: 'New Customers per Month',
+                data: {{ customer_growth_data|safe }},
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgb(153, 102, 255)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                },
+                x: {
+                    ticks: { color: '#666' },
+                    grid: { color: 'rgba(0,0,0,0.1)' }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Analytics Dashboard</h2>
+    <div>
+        <a href="{% url 'dashboard:export_dashboard_data' %}?filter={{ filter_type }}" class="btn btn-success me-2">📥 Export Data</a>
+        <a href="{% url 'dashboard:manager_dashboard' %}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+<form method="get" class="mb-4">
+    <div class="btn-group" role="group">
+        <a href="?filter=week" 
+   class="btn {% if filter_type == 'week' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+   Last Week
+</a>
+
+<a href="?filter=month" 
+   class="btn {% if filter_type == 'month' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+   Last Month
+</a>
+
+<a href="?filter=3months" 
+   class="btn {% if filter_type == '3months' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+   Last 3 Months
+</a>
+
+    </div>
+</form>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Daily Appointments</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="appointmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Daily Revenue</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Customer Growth (Last 6 Months)</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Top Services</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Bookings</th>
+                                <th>Revenue</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for service in top_services %}
+                                <tr>
+                                    <td>{{ service.title }}</td>
+                                    <td>{{ service.total_bookings }}</td>
+                                    <td>${{ service.total_revenue|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No service data available.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Popular Addons</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Addon</th>
+                                <th>Times Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for addon in addon_usage %}
+                                <tr>
+                                    <td>{{ addon.name }}</td>
+                                    <td>{{ addon.times_used }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center">No addon data available.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

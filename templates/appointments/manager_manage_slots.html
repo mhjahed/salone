@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Manage Time Slots - Salone{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Time Slots</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Generate New Time Slots</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-3">
+                <label class="form-label">Start Date</label>
+                <input type="date" name="start_date" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Start Time</label>
+                <input type="time" name="start_time" class="form-control" value="09:00" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">End Time</label>
+                <input type="time" name="end_time" class="form-control" value="18:00" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Interval (min)</label>
+                <select name="interval" class="form-select">
+                    <option value="15">15</option>
+                    <option value="30" selected>30</option>
+                    <option value="60">60</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-success">Generate Slots</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Upcoming Available Slots (Next 50)</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in slots %}
+                        <tr>
+                            <td>{{ slot.date }}</td>
+                            <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                            <td>
+                                <span class="badge bg-{{ slot.is_available|yesno:'success,danger' }}">
+                                    {{ slot.is_available|yesno:'Available,Booked' }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center">No time slots available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Profile - Salone{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Edit Profile</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label>Phone</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Address</label>
+                        {{ form.address }}
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                    <a href="{% url 'accounts:change_password' %}" class="btn btn-outline-secondary">Change Password</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

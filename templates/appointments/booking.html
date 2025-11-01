@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Book Appointment - Salone{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Select Service</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for s in services %}
+                        <a href="?service={{ s.pk }}" class="list-group-item list-group-item-action {% if service and service.pk == s.pk %}active{% endif %}">
+                            {{ s.title }} - ${{ s.price }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        {% if service %}
+            <div class="card">
+                <div class="card-header">
+                    <h5>Book: {{ service.title }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if form %}
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="service" value="{{ service.pk }}">
+                            
+                            <div class="mb-3">
+                                <label>Select Date & Time</label>
+                                {{ form.time_slot }}
+                            </div>
+                            
+                            {% if service.addons.exists %}
+                                <div class="mb-3">
+                                    <label>Addons (Optional)</label>
+                                    {{ form.addons }}
+                                </div>
+                            {% endif %}
+                            
+                            <button type="submit" class="btn btn-primary">Request Appointment</button>
+                        </form>
+                    {% else %}
+                        <p>Please select a date and time to book your appointment.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                Please select a service from the left panel to book an appointment.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

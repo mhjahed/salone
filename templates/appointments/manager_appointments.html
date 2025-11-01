@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block title %}Manage Appointments - Salone{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Manage Appointments</h2>
+    <a href="{% url 'appointments:manager_print_customers' %}" class="btn btn-outline-primary">🖨️ Print Customers</a>
+</div>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+            <option value="">All Statuses</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Date</label>
+        <input type="date" name="date" class="form-control" value="{{ date_filter }}">
+    </div>
+    <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Service</th>
+                <th>Date & Time</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appt in appointments %}
+                <tr>
+                    <td>{{ appt.customer.get_full_name|default:appt.customer.username }}</td>
+                    <td>{{ appt.service.title }}</td>
+                    <td>{{ appt.time_slot.date }}<br>{{ appt.time_slot.start_time }}</td>
+                    <td>${{ appt.total_amount }}</td>
+                    <td>
+                        <span class="badge bg-{{ appt.status }}">{% if appt.status == 'pending' %}warning{% elif appt.status == 'confirmed' %}success{% elif appt.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                            {{ appt.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="confirmed">
+                            <button type="submit" class="btn btn-sm btn-success" {% if appt.status == 'confirmed' %}disabled{% endif %}>Confirm</button>
+                        </form>
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="status" value="cancelled">
+                            <button type="submit" class="btn btn-sm btn-danger" {% if appt.status == 'cancelled' %}disabled{% endif %}>Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No appointments found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

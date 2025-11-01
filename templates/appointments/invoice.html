@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Invoice - Salone{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header text-center bg-primary text-white">
+                <h3>Salone</h3>
+                <p>Appointment Invoice</p>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Invoice #:</strong> INV-{{ appointment.id }}</p>
+                        <p><strong>Date:</strong> {{ appointment.created_at|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <p><strong>Customer:</strong> {{ appointment.customer.get_full_name|default:appointment.customer.username }}</p>
+                        <p><strong>Status:</strong> {{ appointment.get_status_display }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h5>Service Details</h5>
+                <p><strong>{{ appointment.service.title }}</strong></p>
+                <p>Duration: {{ appointment.service.duration }} minutes</p>
+                <p>Date: {{ appointment.time_slot.date }}</p>
+                <p>Time: {{ appointment.time_slot.start_time }} - {{ appointment.time_slot.end_time }}</p>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Items</h6>
+                        <p>Service: {{ appointment.service.title }}</p>
+                        {% for addon in appointment.addons.all %}
+                            <p>Addon: {{ addon.name }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h6>Amount</h6>
+                        <p>${{ appointment.service.price }}</p>
+                        {% for addon in appointment.addons.all %}
+                            <p>${{ addon.price }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="text-end">
+                    <h5>Total: ${{ appointment.total_amount }}</h5>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button onclick="window.print()" class="btn btn-outline-secondary">🖨️ Print Invoice</button>
+                    <a href="{% url 'home' %}" class="btn btn-primary">🏠 Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
